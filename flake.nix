@@ -1,7 +1,5 @@
 {
-  outputs =
-    { ... }:
-    {
+  outputs = { self, nixpkgs, ... }@inputs: {
       templates = {
         python313 = {
           path = ./templates/python313;
@@ -64,4 +62,5 @@
           '';
         };
     };
+  };
 }
