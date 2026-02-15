@@ -1,5 +1,8 @@
 {
-  outputs = { self, nixpkgs, ... }@inputs: {
+  description = "A collection of flake templates for Python projects";
+  
+  outputs = { self, ... }:
+    {
       templates = {
         python313 = {
           path = ./templates/python313;
