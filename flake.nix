@@ -4,6 +4,10 @@
   outputs = { self, ... }:
     {
       templates = {
+        python312 = {
+          path = ./templates/python312;
+          description = "Python 3.12 development template";
+        };
         python313 = {
           path = ./templates/python313;
           description = "Python 3.13 development template";
