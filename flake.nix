@@ -68,6 +68,12 @@
             Minimal starting project for nix-based python project development
           '';
         };
+        python-multi = {
+          path = ./templates/python-multi;
+          description = ''
+            Robust flake for python development.
+          '';
+        };
     };
   };
 }
