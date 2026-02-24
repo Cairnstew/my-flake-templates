@@ -1,20 +1,17 @@
 {
-  description = "hello world application using uv2nix";
+  description = "Python flake using uv2nix";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.pyproject-nix.follows = "pyproject-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     pyproject-build-systems = {
       url = "github:pyproject-nix/build-system-pkgs";
       inputs.pyproject-nix.follows = "pyproject-nix";
@@ -34,6 +31,9 @@
     let
       inherit (nixpkgs) lib;
       forAllSystems = lib.genAttrs lib.systems.flakeExposed;
+
+      project = pyproject-nix.lib.project.loadPyproject { projectRoot = ./.; };
+      name = project.pyproject.project.name;
 
       workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
 
@@ -61,7 +61,6 @@
             ]
           )
       );
-
     in
     {
       devShells = forAllSystems (
@@ -75,7 +74,7 @@
           default = pkgs.mkShell {
             packages = [
               virtualenv
-              pkgs.uv
+              #pkgs.uv
             ];
             env = {
               UV_NO_SYNC = "1";
@@ -90,8 +89,27 @@
         }
       );
 
-      packages = forAllSystems (system: {
-        default = pythonSets.${system}.mkVirtualEnv "env" workspace.deps.default;
-      });
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          pythonSet = pythonSets.${system};
+          util = pkgs.callPackage pyproject-nix.build.util { };
+          venv = pythonSet.mkVirtualEnv "env" workspace.deps.default;
+          app = util.mkApplication {
+            inherit venv;
+            package = pythonSet.${name};
+          };
+        in
+        {
+          default = pkgs.symlinkJoin {
+            name = name;
+            paths = [
+              app
+              #pkgs.aria2
+            ];
+          };
+        }
+      );
     };
 }
