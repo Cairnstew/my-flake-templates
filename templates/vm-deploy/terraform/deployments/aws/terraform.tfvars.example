@@ -1,0 +1,6 @@
+# bucket         = "my-nixos-images-aws"
+# image_path     = "../../result/nixos-image.vhd"
+# image_hash     = "abc1234"
+# ssh_public_key = "ssh-ed25519 AAAA..."
+# vm_name        = "myvm"
+# instance_type  = "t3.small"

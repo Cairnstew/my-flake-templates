@@ -1,0 +1,7 @@
+# project        = "my-gcp-project"
+# bucket         = "my-nixos-images-gcp"
+# image_path     = "../../result/nixos-image.tar.gz"
+# image_hash     = "abc1234"
+# ssh_public_key = "ssh-ed25519 AAAA..."
+# vm_name        = "myvm"
+# machine_type   = "e2-small"
