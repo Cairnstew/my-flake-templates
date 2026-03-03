@@ -74,6 +74,13 @@
             Robust flake for python development.
           '';
         };
+
+        vm-deploy = {
+          path = ./templates/vm-deploy;
+          description = ''
+            Template for building and deploying a NixOS image to GCP or AWS.
+          '';
+        };
     };
   };
 }
