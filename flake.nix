@@ -36,6 +36,11 @@
           description = "A nix based c++ development project skeleton with CMake";
         };
 
+        forge-dev = {
+          path = ./templates/forge-dev;
+          description = "A Minecraft mod development environment with NeoForge / Forge";
+        };
+
         nixos-config = {
           path = ./templates/nixos-config;
           description = "Template for creating a repo that hosts your NixOS configurations";
