@@ -1,0 +1,34 @@
+pluginManagement {
+    repositories {
+        // Forge's Maven MUST come before gradlePluginPortal so the
+        // ForgeGradle plugin marker artifact is found.
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net'
+        }
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+// Declare the repos here too so dependencyResolutionManagement picks
+// them up for any settings-level dependencies.
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net'
+        }
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'forge-mod'

@@ -1,0 +1,167 @@
+// ════════════════════════════════════════════════════════════════
+//  build.gradle  –  values injected from gradle.properties
+//  (which in turn is generated from mod-config.nix)
+// ════════════════════════════════════════════════════════════════
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://maven.parchmentmc.org' }
+        mavenCentral()
+    }
+    dependencies {
+        // ForgeGradle — pin to the version range that matches your Forge release:
+        //   Forge 47.x (MC 1.20.1)  → ForgeGradle 6.x
+        //   Forge 43.x (MC 1.19.2)  → ForgeGradle 5.x  → change to 'ForgeGradle:5.+'
+        //   Forge 40.x (MC 1.18.2)  → ForgeGradle 5.x
+        //   Forge 36.x (MC 1.16.5)  → ForgeGradle 5.x
+        classpath 'net.minecraftforge.gradle:ForgeGradle:6.+'
+        classpath 'org.parchmentmc:librarian:1.+'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+
+version   = mod_version
+group     = mod_group_id
+archivesBaseName = mod_id
+
+// ForgeGradle manages the JDK; set sourceCompatibility to match.
+// The Nix flake already puts the right JDK on PATH via JAVA_HOME.
+def javaVersion = minecraft_version.startsWith('1.20') ? JavaVersion.VERSION_17
+                : minecraft_version.startsWith('1.19') ? JavaVersion.VERSION_17
+                : minecraft_version.startsWith('1.18') ? JavaVersion.VERSION_17
+                : minecraft_version.startsWith('1.17') ? JavaVersion.VERSION_16
+                : JavaVersion.VERSION_1_8
+
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    withSourcesJar()
+    withJavadocJar()
+}
+
+// ── Mappings ───────────────────────────────────────────────────
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+
+    copyIdeResources = true
+
+    // ── Run configurations ───────────────────────────────────
+    runs {
+        client {
+            workingDirectory project.file('run/client')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { "${mod_id}" { source sourceSets.main } }
+            args '--username', 'Dev'
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run/gametest')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+
+        data {
+            workingDirectory project.file('run/data')
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', mod_id,
+                 '--all',
+                 '--output', file('src/generated/resources/'),
+                 '--existing', file('src/main/resources/')
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+    }
+}
+
+// ── Source sets (include datagen output) ───────────────────────
+sourceSets.main.resources {
+    srcDirs 'src/generated/resources'
+}
+
+// ── Dependencies ───────────────────────────────────────────────
+repositories {
+    maven { url = 'https://maven.minecraftforge.net' }
+    maven { url = 'https://maven.parchmentmc.org' }
+    mavenCentral()
+    // ── Add mod-specific repos here ──
+    // maven { url = 'https://maven.blamejared.com' }        // JEI
+    // maven { url = 'https://maven.theillusivec4.com' }     // Curios
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // ── Optional / required mod deps (add as needed) ──────────
+    // compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    // runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+}
+
+// ── JAR manifest ───────────────────────────────────────────────
+jar {
+    manifest {
+        attributes([
+            'Specification-Title'     : mod_id,
+            'Specification-Vendor'    : mod_authors,
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.jar.archiveVersion,
+            'Implementation-Vendor'   : mod_authors,
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+// ── Reobf (Forge's byte-code transformation) ───────────────────
+reobf { jar {} }
+
+// ── Maven publishing ───────────────────────────────────────────
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = mod_id
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir('repo')
+        }
+    }
+}
+
+// ── ProcessResources: inject properties into mods.toml / pack.mcmeta
+tasks.named('processResources', ProcessResources) {
+    var replaceProps = [
+        mod_id             : mod_id,
+        mod_name           : mod_name,
+        mod_version        : mod_version,
+        mod_authors        : mod_authors,
+        mod_description    : mod_description,
+        minecraft_version  : minecraft_version,
+        minecraft_version_range : minecraft_version_range,
+        forge_version      : forge_version,
+        forge_version_range: forge_version_range,
+        loader_version_range: loader_version_range,
+    ]
+    inputs.properties replaceProps
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProps
+    }
+}
