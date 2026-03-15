@@ -8,6 +8,10 @@
           path = ./templates/python312;
           description = "Python 3.12 development template";
         };
+        llm-dev-312 = {
+          path = ./templates/llm-dev-312;
+          description = "Python 3.12 development template for llm dev";
+        };
         python313 = {
           path = ./templates/python313;
           description = "Python 3.13 development template";
