@@ -4,27 +4,6 @@
   outputs = { self, ... }:
     {
       templates = {
-        python312 = {
-          path = ./templates/python312;
-          description = "Python 3.12 development template";
-        };
-        llm-dev-312 = {
-          path = ./templates/llm-dev-312;
-          description = "Python 3.12 development template for llm dev";
-        };
-        python313 = {
-          path = ./templates/python313;
-          description = "Python 3.13 development template";
-        };
-        python314 = {
-          path = ./templates/python314;
-          description = "Python 3.14 development template";
-        };
-        torch-basics = {
-          path = ./templates/torch-basics;
-          description = "Template for a basic machine learning project with PyTorch";
-        };
-
         jax-equinox-basics = {
           path = ./templates/jax-equinox-basics;
           description = "Template for a basic machine learning project with Jax (equinox)";
@@ -71,19 +50,12 @@
           '';
         };
 
-        python-project = {
-          path = ./templates/python-project;
+        python = {
+          path = ./templates/python;
           description = ''
-            Minimal starting project for nix-based python project development
+            Starting project for nix-based python project development
           '';
         };
-        python-multi = {
-          path = ./templates/python-multi;
-          description = ''
-            Robust flake for python development.
-          '';
-        };
-
         vm-deploy = {
           path = ./templates/vm-deploy;
           description = ''
